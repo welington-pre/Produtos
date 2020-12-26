@@ -45,8 +45,16 @@ public class ProdutoController {
 	
 	@GetMapping
 	@ApiOperation(value = "Retorna uma lista de produtos")
-	public List<Produto> todos() {
-		return service.todos();
+	public List<ProdutoResponse> todos() {
+		List<Produto> produto = service.todos();
+		
+		List<ProdutoResponse> produtoRespose = produto
+				.stream()
+				.map((produtoMap) ->{
+					return new ProdutoResponse(produtoMap);
+				}).collect(Collectors.toList());
+		
+		return produtoRespose;
 	}
 	
 	@GetMapping("/{id}")
@@ -58,14 +66,20 @@ public class ProdutoController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	@ApiOperation(value = "grava um produto no banco de dados")
-	public Produto salvar(@RequestBody @Valid Produto produto) {
-		return service.salva(produto);
+	public ProdutoResponse salvar(@RequestBody @Valid ProdutoRequest produtoRequest) {
+		Produto produto = mapper.map(produtoRequest, Produto.class);
+		
+		Produto produtoSalvo = service.salva(produto);
+		return new ProdutoResponse(produtoSalvo);
 	}
 	
 	@PutMapping("/{id}")
 	@ApiOperation(value = "Altera um produto no banco de dados")
-	public Produto alterar(@PathVariable Integer id, @RequestBody @Valid Produto produto) {
-		return service.altera(id, produto);
+	public ProdutoResponse alterar(@PathVariable Integer id, @RequestBody @Valid ProdutoRequest produtoRequest) {
+		Produto produto = mapper.map(produtoRequest, Produto.class);
+		
+		Produto produtoAlterado = service.altera(id, produto);
+		return new ProdutoResponse(produtoAlterado);
 	}
 	
 	@DeleteMapping("/{id}")
